@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Restaurant Recommendation System</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Restaurant Recommendation System using Data Mining [Front-End]" />
+    <meta name="author" content="Hussain Mustafa Esufaly" />
+
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"
+        integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet" type="text/css">
+
+</head>
+<Style>
+    .jumbotron {
+        background-color: #f4511e;
+        color: #fff;
+        padding: 100px 25px;
+        text-align: center;
+    }
+
+    .bg-grey {
+        background-color: #c9c9c9;
+    }
+
+    table {
+        font-family: arial, sans-serif;
+        font-size: 18px;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+    td,
+    th {
+        border: 1px solid #dddddd;
+        text-align: center;
+        padding: 8px;
+    }
+
+    .footer {
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        background-color: #f4511e;
+        color: white;
+        text-align: center;
+    }
+
+    #resultContent {
+        background-color: #cccccc;
+        background-repeat: no-repeat;
+        background-size: cover;
+        position: relative;
+    }
+</Style>
+
+<body>
+    <div class="jumbotron">
+        <h1>Restaurant Recommendation System</h1>
+        <br>
+        <br>
+        <div class="input-group">
+            <input type="text" name="restaurant" id="restaurant" placeholder="Enter Restaurant Name"
+                class="form-control">
+            <div class="input-group-btn">
+                <button onclick="getReviews()" class="btn btn-danger">Search Resturant</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid bg-grey">
+        <div class="row">
+            <table>
+                <tr>
+                    <th>
+                        <p id="statsPos"> </p>
+                    </th>
+                    <th>
+                        <p id="statsNeu"> </p>
+                    </th>
+                    <th>
+                        <p id="statsNeg"> </p>
+                    </th>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div id="resultContent">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-sm-5">
+                    <p id="results">.</p>
+                    <p style="font-size:20px;" id="ResNotFound"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="footer">
+        <a href="#top" title="To Top">
+            <span class="glyphicon glyphicon-chevron-up"></span>
+        </a>
+    </div>
+</body>
+
+<script>
+    const regex = / /gm;
+        function getReviews() {
+            restaurant = document.getElementById('restaurant').value;
+            restaurant = restaurant.replace(regex, '');
+            if (restaurant) {
+                var body = {
+                    search_term: restaurant
+                };
+                var options = {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(body)
+                };
+                fetch('http://127.0.0.1:5000/get_restaurant_info', options).then(function (response) {
+                    return response.json();
+                }).then(function (data) {
+                    // THis is where the data is obtained
+                    console.log(data);
+                    results = document.getElementById('results');
+                    document.getElementById("statsPos").innerHTML = '';
+                    document.getElementById("statsNeu").innerHTML = '';
+                    document.getElementById("statsNeg").innerHTML = '';
+                    document.getElementById("ResNotFound").innerHTML = '';
+                    document.getElementById("results").innerHTML = '';
+                    if (data.restaurant_info == undefined || data.restaurant_info.length == 0) {
+                        $('#ResNotFound').append('<strong>Resturant Not Found</strong>');
+                    }
+                    data.restaurant_info.forEach(res => {
+                        $('#results').append('<hr />');
+                        $('#results').append('<strong>Restaurant Name:</strong> '.fontsize(1) + res.restaurant_name);
+                        $('#results').append('<br />');
+                        $('#results').append('<strong>Restaurant Location:</strong> '.fontsize(1) + res.location);
+                        $('#results').append('<br />');
+                        //$('#results').append('Restaurant ID: ' + res.restaurant_id);
+                        //$('#results').append('<br />');
+                        $('#results').append('<strong>Review Statistics:</strong>'.fontsize(1) + ' Positive - ' + JSON.stringify(res.review_stats.pos) + '  Neutral - ' + JSON.stringify(res.review_stats.neu) + '  Negative - ' + JSON.stringify(res.review_stats.neg));
+                        $('#results').append('<br />');
+                        $('#results').append('Reviews'.fontsize(2));
+                        $('#results').append('<br />');
+                        var c = 1;
+                        res.restaurant_reviews.forEach(review => {
+                            $('#results').append('<strong>Review ' + c + ': </strong>' + review.review_text);
+                            $('#results').append('<br />');
+                            $('#results').append('<strong>Review ' + c + ' Sentiment: </strong>' + review.review_sentiment);
+                            $('#results').append('<br />');
+                            c++;
+                            // console.log('Review: ' + review.review_text);
+                            // console.log('Sentiment: ' + review.review_sentiment);
+                        });
+                        $('#results').append('<hr />');
+                    });
+                    $('#statsPos').append('<strong>Total Positive Reviews: </strong>' + JSON.stringify(data.all_restaurant_stats.tot_pos));
+                    $('#statsNeu').append('<strong>Total Neutral Reviews: </strong>' + JSON.stringify(data.all_restaurant_stats.tot_neu));
+                    $('#statsNeg').append('<strong>Total Negative Reviews: </strong>' + JSON.stringify(data.all_restaurant_stats.tot_neg));
+                }).catch(function (error) {
+                    console.error(error);
+                });
+            }
+        }
+</script>
+
+</html>

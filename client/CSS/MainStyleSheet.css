@@ -1,0 +1,41 @@
+		.jumbotron {
+            background-color: #f4511e;
+            color: #fff;
+            padding: 100px 25px;
+            text-align: center;
+        }
+
+        .bg-grey {
+            background-color: #c9c9c9;
+        }
+
+        table {
+            font-family: arial, sans-serif;
+            font-size: 18px;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        td,
+        th {
+            border: 1px solid #dddddd;
+            text-align: center;
+            padding: 8px;
+        }
+
+        .footer {
+            position: fixed;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            background-color: #f4511e;
+            color: white;
+            text-align: center;
+        }
+
+        #example1 {
+            background-color: #cccccc;
+            background-repeat: no-repeat;
+            background-size: cover;
+            position: relative;
+        }
